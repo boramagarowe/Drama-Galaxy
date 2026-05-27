@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drama Galaxy — Discover Your Next Obsession</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070B16; --bg2:#0E1424; --panel:#131B2E;
+    --c1:#2E90FF; --c2:#5BC8FF;             /* bright blue accent */
+    --text:#EAF2FF; --muted:rgba(234,242,255,.58); --faint:rgba(234,242,255,.30);
+    --line:rgba(234,242,255,.10); --gold:#FFC23D;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; overflow-x:hidden; min-height:100vh; position:relative}
+  ::-webkit-scrollbar{width:9px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:rgba(46,144,255,.35);border-radius:10px}
+  a{color:inherit;text-decoration:none}
+
+  .bg-collage{position:fixed; inset:0; z-index:0; display:grid; grid-template-columns:repeat(6,1fr); grid-auto-rows:1fr; gap:6px; opacity:.12; filter:blur(7px) saturate(1.05); pointer-events:none; transform:scale(1.08)}
+  .bg-collage div{background-size:cover; background-position:center; border-radius:8px}
+  .bg-veil{position:fixed; inset:0; z-index:1; pointer-events:none;
+    background:
+      radial-gradient(ellipse 70% 55% at 22% 0%, rgba(46,144,255,.16), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 92% 8%, rgba(91,200,255,.10), transparent 60%),
+      linear-gradient(180deg, rgba(7,11,22,.55), rgba(7,11,22,.92) 60%, var(--bg));}
+  .wrap{position:relative; z-index:2}
+
+  nav{position:sticky; top:0; z-index:40; display:flex; align-items:center; gap:22px; padding:13px 28px; background:rgba(7,11,22,.74); backdrop-filter:blur(18px); border-bottom:1px solid var(--line)}
+  .logo{display:flex; align-items:center; gap:11px; cursor:pointer}
+  .logo .emblem{width:38px; height:38px; flex-shrink:0; display:flex}
+  .logo .logo-text{font-family:'Fraunces',serif; font-weight:700; font-size:23px; letter-spacing:.3px}
+  .logo .gx{background:linear-gradient(120deg,var(--c1),var(--c2)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+  .navtabs{display:flex; gap:4px; flex-wrap:wrap}
+  .tab{padding:7px 15px; border-radius:30px; font-size:13.5px; font-weight:500; color:var(--muted); cursor:pointer; border:1px solid transparent; transition:.2s; white-space:nowrap}
+  .tab:hover{color:var(--text); background:rgba(234,242,255,.06)}
+  .tab.active{color:#fff; background:linear-gradient(120deg,var(--c1),var(--c2)); font-weight:700}
+  .searchwrap{margin-left:auto; position:relative; display:flex; align-items:center}
+  .searchwrap input{background:rgba(234,242,255,.07); border:1px solid var(--line); border-radius:30px; padding:9px 16px 9px 38px; font-size:13.5px; color:var(--text); outline:none; width:190px; font-family:inherit; transition:.2s}
+  .searchwrap input:focus{border-color:var(--c1); width:230px}
+  .searchwrap input::placeholder{color:var(--faint)}
+  .searchwrap .ic{position:absolute; left:14px; opacity:.5; pointer-events:none}
+
+  .hero{position:relative; padding:58px 28px 34px; display:flex; align-items:center; gap:40px; max-width:1180px; margin:0 auto; flex-wrap:wrap; justify-content:center; overflow:hidden; border-radius:0 0 28px 28px}
+  .hero-bg{position:absolute; inset:0; z-index:0; background-size:cover; background-position:center 30%; opacity:0; transition:opacity 1.4s ease; transform:scale(1.05); animation:kenburns 18s ease-in-out infinite alternate}
+  .hero-bg.on{opacity:.30}
+  @keyframes kenburns{from{transform:scale(1.05)}to{transform:scale(1.16)}}
+  .hero-bg::after{content:''; position:absolute; inset:0; background:linear-gradient(110deg, var(--bg) 18%, rgba(7,11,22,.62) 55%, rgba(7,11,22,.32))}
+  .hero-text{flex:1; min-width:300px; max-width:560px; position:relative; z-index:2}
+  .eyebrow{display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--c1); margin-bottom:16px}
+  .eyebrow .dot{width:6px; height:6px; border-radius:50%; background:var(--c2)}
+  h1.headline{font-family:'Fraunces',serif; font-size:clamp(34px,5vw,56px); line-height:1.08; font-weight:700; margin-bottom:18px}
+  h1.headline em{font-style:italic; background:linear-gradient(120deg,var(--c1),var(--c2)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+  .hero-sub{font-size:16.5px; color:var(--muted); line-height:1.65; margin-bottom:28px; max-width:460px}
+  .hero-cta{display:flex; gap:12px; flex-wrap:wrap}
+  .btn-primary{display:inline-flex; align-items:center; gap:10px; padding:14px 26px; border:none; cursor:pointer; border-radius:40px; font-family:inherit; font-size:15px; font-weight:700; color:#fff; background:linear-gradient(120deg,var(--c1),var(--c2)); box-shadow:0 8px 30px rgba(46,144,255,.35); transition:.25s}
+  .btn-primary:hover{transform:translateY(-2px); box-shadow:0 12px 38px rgba(46,144,255,.5)}
+  .btn-ghost{display:inline-flex; align-items:center; gap:8px; padding:14px 24px; border-radius:40px; border:1px solid var(--line); background:rgba(14,20,36,.4); color:var(--text); font-family:inherit; font-size:15px; font-weight:500; cursor:pointer; transition:.2s}
+  .btn-ghost:hover{background:rgba(234,242,255,.08); border-color:var(--c1)}
+
+  .hero-mascot{flex-shrink:0; width:240px; height:240px; position:relative; display:flex; align-items:center; justify-content:center; z-index:2}
+  .mascot-glow{position:absolute; inset:18px; background:radial-gradient(circle, rgba(46,144,255,.30), transparent 65%); filter:blur(10px)}
+  .floaty{animation:floaty 4s ease-in-out infinite; cursor:pointer}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+  .bubble{position:absolute; top:8px; left:-4px; background:#fff; color:#0E1424; font-size:13px; font-weight:600; padding:8px 13px; border-radius:14px 14px 14px 3px; box-shadow:0 8px 24px rgba(0,0,0,.35); opacity:0; transform:translateY(8px) scale(.9); transition:.35s; pointer-events:none; white-space:nowrap; z-index:3}
+  .bubble.show{opacity:1; transform:translateY(0) scale(1)}
+
+  .section{max-width:1180px; margin:0 auto; padding:26px 28px 40px}
+  .sec-head{display:flex; align-items:baseline; gap:14px; margin-bottom:4px; flex-wrap:wrap}
+  .sec-head h2{font-family:'Fraunces',serif; font-size:27px; font-weight:600}
+  .sec-head .count{font-size:13px; color:var(--faint)}
+  .wink{font-family:'Fraunces',serif; font-style:italic; font-size:15px; color:var(--c1); margin-bottom:18px; opacity:.92}
+  .genres{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px}
+  .gpill{padding:6px 14px; border-radius:30px; font-size:12.5px; font-weight:500; color:var(--muted); border:1px solid var(--line); background:transparent; cursor:pointer; transition:.2s; font-family:inherit}
+  .gpill:hover{color:var(--text); border-color:rgba(46,144,255,.4)}
+  .gpill.active{color:var(--c1); border-color:var(--c1); background:rgba(46,144,255,.12); font-weight:700}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:20px 16px}
+  .card{cursor:pointer; transition:.28s cubic-bezier(.34,1.4,.5,1); animation:rise .5s ease both}
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  .card:hover{transform:translateY(-7px)}
+  .poster{position:relative; aspect-ratio:2/3; border-radius:14px; overflow:hidden; background:var(--panel); box-shadow:0 6px 18px rgba(0,0,0,.45); border:1px solid var(--line)}
+  .poster img{width:100%; height:100%; object-fit:cover; display:block; transition:.4s}
+  .card:hover .poster img{transform:scale(1.06)}
+  .poster .rating{position:absolute; top:9px; right:9px; background:rgba(7,11,22,.82); backdrop-filter:blur(4px); border-radius:8px; padding:3px 8px; font-size:12px; font-weight:700; color:var(--gold); display:flex; align-items:center; gap:3px}
+  .poster .noimg{width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:var(--faint); font-size:13px; text-align:center; padding:14px}
+  .card .title{margin-top:10px; font-size:14px; font-weight:500; line-height:1.3; color:var(--text)}
+  .card .meta{font-size:12px; color:var(--faint); margin-top:3px}
+  .sk{aspect-ratio:2/3; border-radius:14px; background:linear-gradient(100deg,var(--panel) 30%,rgba(234,242,255,.07) 50%,var(--panel) 70%); background-size:200% 100%; animation:shimmer 1.4s infinite}
+  @keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+  .loadmore{padding:12px 30px; border-radius:30px; border:1px solid var(--line); background:rgba(46,144,255,.08); color:var(--text); font-family:inherit; font-size:14px; font-weight:600; cursor:pointer; transition:.2s}
+  .loadmore:hover{border-color:var(--c1); background:rgba(46,144,255,.16)}
+
+  .overlay{position:fixed; inset:0; background:rgba(4,7,14,.84); backdrop-filter:blur(10px); z-index:80; display:flex; align-items:center; justify-content:center; padding:20px; animation:fade .25s}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .modal{background:var(--bg2); border:1px solid var(--line); border-radius:22px; max-width:680px; width:100%; max-height:88vh; overflow-y:auto; animation:pop .3s cubic-bezier(.34,1.4,.5,1)}
+  @keyframes pop{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
+  .modal-hero{position:relative; height:230px; overflow:hidden}
+  .modal-hero img{width:100%; height:100%; object-fit:cover; filter:brightness(.62)}
+  .modal-hero::after{content:''; position:absolute; inset:0; background:linear-gradient(to top, var(--bg2), transparent 70%)}
+  .modal-close{position:absolute; top:14px; right:14px; z-index:2; width:34px; height:34px; border-radius:50%; border:none; background:rgba(7,11,22,.7); color:var(--text); font-size:18px; cursor:pointer}
+  .modal-body{padding:0 28px 28px; margin-top:-60px; position:relative; z-index:2}
+  .modal-body h2{font-family:'Fraunces',serif; font-size:30px; font-weight:700; line-height:1.1}
+  .modal-meta{display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin:12px 0 16px; font-size:14px; color:var(--muted)}
+  .modal-meta .star{color:var(--gold); font-weight:700}
+  .tagrow{display:flex; gap:7px; flex-wrap:wrap; margin-bottom:18px}
+  .gtag{font-size:12px; padding:4px 12px; border-radius:30px; background:rgba(46,144,255,.13); color:var(--c2); font-weight:500}
+  .modal-body p.syn{font-size:15px; line-height:1.7; color:rgba(234,242,255,.82); margin-bottom:20px}
+  .cast-h{font-size:13px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--c1); margin-bottom:12px}
+  .cast{display:flex; gap:14px; overflow-x:auto; padding-bottom:8px}
+  .castm{flex-shrink:0; width:78px; text-align:center}
+  .castm img{width:64px; height:64px; border-radius:50%; object-fit:cover; border:2px solid var(--line)}
+  .castm .ph{width:64px; height:64px; border-radius:50%; background:var(--panel); display:flex; align-items:center; justify-content:center; margin:0 auto; font-size:20px}
+  .castm .cn{font-size:11.5px; margin-top:6px; color:var(--text); line-height:1.2}
+  .castm .cr{font-size:10.5px; color:var(--faint); line-height:1.2}
+
+  .kfab{position:fixed; bottom:24px; right:24px; z-index:60; width:66px; height:66px; border-radius:50%; border:none; cursor:pointer; background:linear-gradient(120deg,var(--c1),var(--c2)); box-shadow:0 8px 30px rgba(46,144,255,.45); display:flex; align-items:center; justify-content:center; transition:.25s}
+  .kfab:hover{transform:scale(1.08) translateY(-2px)}
+  .kpanel{position:fixed; bottom:24px; right:24px; z-index:70; width:380px; max-width:calc(100vw - 32px); height:580px; max-height:calc(100vh - 48px); background:var(--bg2); border:1px solid rgba(46,144,255,.3); border-radius:22px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.55); animation:pop .3s cubic-bezier(.34,1.4,.5,1)}
+  .khead{display:flex; align-items:center; gap:11px; padding:14px 18px; background:linear-gradient(120deg,rgba(46,144,255,.2),rgba(91,200,255,.13)); border-bottom:1px solid var(--line)}
+  .khead .kava{width:44px; height:44px; flex-shrink:0}
+  .khead .kt{font-family:'Fraunces',serif; font-weight:700; font-size:17px}
+  .khead .ks{font-size:11px; color:var(--muted)}
+  .khead .kclose{margin-left:auto; width:28px; height:28px; border-radius:50%; border:none; background:rgba(234,242,255,.1); color:var(--text); cursor:pointer; font-size:15px}
+  .kbody{flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px}
+  .kmsg{max-width:88%; padding:11px 14px; font-size:13.5px; line-height:1.55; border-radius:16px}
+  .kmsg.bot{align-self:flex-start; background:rgba(234,242,255,.07); border:1px solid var(--line); border-bottom-left-radius:5px}
+  .kmsg.user{align-self:flex-end; background:linear-gradient(120deg,var(--c1),var(--c2)); color:#fff; font-weight:500; border-bottom-right-radius:5px}
+  .kmsg b{font-weight:700}
+  .ktyping{align-self:flex-start; display:flex; gap:5px; padding:13px 16px; background:rgba(234,242,255,.07); border-radius:16px; border-bottom-left-radius:5px}
+  .ktyping span{width:7px; height:7px; border-radius:50%; background:var(--c2); animation:bb 1s infinite}
+  .ktyping span:nth-child(2){animation-delay:.18s} .ktyping span:nth-child(3){animation-delay:.36s}
+  @keyframes bb{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-5px);opacity:1}}
+  .kfoot{padding:12px 14px; border-top:1px solid var(--line); display:flex; gap:9px}
+  .kfoot input{flex:1; background:rgba(234,242,255,.07); border:1px solid var(--line); border-radius:14px; padding:11px 14px; color:var(--text); font-size:13.5px; outline:none; font-family:inherit}
+  .kfoot input:focus{border-color:var(--c1)}
+  .kfoot input::placeholder{color:var(--faint)}
+  .kfoot button{width:44px; border:none; border-radius:14px; background:linear-gradient(120deg,var(--c1),var(--c2)); color:#fff; font-size:18px; cursor:pointer; flex-shrink:0}
+  .kchips{display:flex; gap:7px; flex-wrap:wrap; margin-top:4px}
+  .kchip{font-size:11.5px; padding:5px 11px; border-radius:20px; border:1px solid var(--line); color:var(--muted); cursor:pointer; transition:.2s}
+  .kchip:hover{border-color:var(--c1); color:var(--c1)}
+  .kresults{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:2px}
+  .kres{cursor:pointer; background:rgba(234,242,255,.05); border:1px solid var(--line); border-radius:12px; overflow:hidden; transition:.2s}
+  .kres:hover{border-color:var(--c1); transform:translateY(-3px)}
+  .kres .kp{position:relative; aspect-ratio:2/3; background:var(--panel)}
+  .kres .kp img{width:100%;height:100%;object-fit:cover}
+  .kres .kmatch{position:absolute; top:6px; left:6px; background:linear-gradient(120deg,var(--c1),var(--c2)); color:#06101F; font-size:11px; font-weight:700; padding:2px 7px; border-radius:6px}
+  .kres .ktitle{padding:7px 8px; font-size:11.5px; font-weight:500; line-height:1.25}
+  .ksmart{display:flex; flex-direction:column; gap:9px; margin-top:2px}
+  .ksrow{display:flex; gap:11px; background:rgba(234,242,255,.05); border:1px solid var(--line); border-radius:12px; padding:9px; transition:.2s}
+  .ksrow.clk{cursor:pointer}
+  .ksrow.clk:hover{border-color:var(--c1); transform:translateY(-2px)}
+  .kspos{width:48px; flex-shrink:0; aspect-ratio:2/3; border-radius:7px; overflow:hidden; background:var(--panel)}
+  .kspos img{width:100%; height:100%; object-fit:cover}
+  .ksnop{width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:18px}
+  .kstxt{flex:1; min-width:0}
+  .ksh{display:flex; align-items:flex-start; gap:8px; justify-content:space-between}
+  .kstitle{font-size:13px; font-weight:700; line-height:1.25}
+  .ksmatch{flex-shrink:0; font-size:11px; font-weight:700; color:#06101F; background:linear-gradient(120deg,var(--c1),var(--c2)); padding:2px 7px; border-radius:6px; white-space:nowrap}
+  .ksyear{font-size:11px; color:var(--faint); margin:2px 0 4px}
+  .ksreason{font-size:12px; color:var(--muted); line-height:1.45}
+
+  .empty{grid-column:1/-1; text-align:center; padding:60px 20px; color:var(--faint)}
+  footer{text-align:center; padding:40px 20px; color:var(--faint); font-size:12.5px; border-top:1px solid var(--line); margin-top:30px}
+  footer a{color:var(--muted)}
+  .heart{position:fixed; bottom:60px; z-index:300; font-size:26px; pointer-events:none; animation:rise-heart 2.6s ease-out forwards}
+  @keyframes rise-heart{0%{opacity:0;transform:translateY(0) scale(.5)}15%{opacity:1}100%{opacity:0;transform:translateY(-70vh) scale(1.3)}}
+  .toast{position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px); z-index:301; background:#fff; color:#0E1424; font-weight:700; padding:12px 22px; border-radius:30px; box-shadow:0 10px 30px rgba(0,0,0,.4); opacity:0; transition:.4s}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+  @media (max-width:560px){ .hero{padding:36px 20px 24px} .hero-mascot{width:180px;height:180px} .section{padding:20px} }
+</style>
+</head>
+<body>
+
+<div class="bg-collage" id="bgCollage"></div>
+<div class="bg-veil"></div>
+
+<div class="wrap">
+<nav>
+  <div class="logo" onclick="goHome()">
+    <span class="emblem" id="emblem"></span>
+    <span class="logo-text">Drama<span class="gx"> Galaxy</span></span>
+  </div>
+  <div class="navtabs" id="navtabs"></div>
+  <div class="searchwrap"><span class="ic">🔍</span><input id="searchInput" placeholder="Search dramas..." onkeydown="if(event.key==='Enter')runSearch()"></div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg" id="heroBg"></div>
+  <div class="hero-text">
+    <span class="eyebrow"><span class="dot"></span> Your universe of stories</span>
+    <h1 class="headline">Discover your<br><em>next obsession</em></h1>
+    <p class="hero-sub">Thousands of K-dramas, C-dramas, and stories from across Asia and beyond. Tell Kdrammer what you're in the mood for — and let him cook up your perfect match.</p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="openK()"><span id="ctamascot"></span> Ask Kdrammer</button>
+      <button class="btn-ghost" onclick="document.getElementById('browse').scrollIntoView()">Browse all ↓</button>
+    </div>
+  </div>
+  <div class="hero-mascot">
+    <div class="mascot-glow"></div>
+    <div class="bubble" id="bubble"></div>
+    <div class="floaty" id="heromascot" onmouseenter="popBubble()"></div>
+  </div>
+</section>
+
+<section class="section" id="browse">
+  <div class="sec-head"><h2 id="secTitle">Trending Now</h2><span class="count" id="secCount"></span></div>
+  <div class="wink" id="wink"></div>
+  <div class="genres" id="genres"></div>
+  <div class="grid" id="grid"></div>
+  <div id="loadmoreWrap" style="text-align:center;margin-top:30px"></div>
+</section>
+
+<footer>Drama Galaxy · Data &amp; posters from <a href="https://www.themoviedb.org" target="_blank">TMDB</a> · Made with ♥ for drama lovers everywhere</footer>
+</div>
+
+<button class="kfab" id="kfab" onclick="openK()" title="Ask Kdrammer"></button>
+
+<script>
+/* ===== CONFIG — keys are NOT here anymore; they live safely on the server (Vercel env vars) ===== */
+const IMG="https://image.tmdb.org/t/p/w342";
+const IMGBIG="https://image.tmdb.org/t/p/w780";
+const BD="https://image.tmdb.org/t/p/w780";
+const BDSMALL="https://image.tmdb.org/t/p/w300";
+const PROFILE="https://image.tmdb.org/t/p/w185";
+const DRAMA_ORIGIN="KR|CN|JP|TH|TW|HK|TR";          /* Asian + Turkish dramas — no Western */
+const EXPLICIT=/\b(porn|erotic|erotica|xxx|hentai|nude|nudity|softcore)\b/i;
+const BLOCKLIST=["overflow"];   /* titles to always hide (flagged) */
+
+/* ===== unique logo: a ringed planet whose ring is a film strip (Galaxy + Drama) ===== */
+function emblemSVG(){
+  return `<svg width="38" height="38" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="eg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2E90FF"/><stop offset="1" stop-color="#5BC8FF"/></linearGradient></defs>
+    <g transform="rotate(-24 24 24)">
+      <ellipse cx="24" cy="24" rx="21" ry="7.6" fill="none" stroke="url(#eg)" stroke-width="5"/>
+      <ellipse cx="24" cy="24" rx="21" ry="7.6" fill="none" stroke="#070B16" stroke-width="2.3" stroke-dasharray="1.6 4"/>
+    </g>
+    <circle cx="24" cy="24" r="10.5" fill="url(#eg)"/>
+    <circle cx="20.5" cy="20.5" r="3" fill="#fff" opacity="0.35"/>
+    <path d="M36 9 l1.3 3 3 1.3 -3 1.3 -1.3 3 -1.3 -3 -3 -1.3 3 -1.3z" fill="#5BC8FF"/>
+  </svg>`;
+}
+
+/* ===== cute chef-man mascot — Kdrammer, cooking up your picks ===== */
+function mascotSVG(size){
+  return `<svg width="${size}" height="${size}" viewBox="0 0 120 132" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="hat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#E7EEFA"/></linearGradient></defs>
+    <ellipse cx="60" cy="127" rx="24" ry="3.6" fill="#000" opacity="0.16"/>
+    <!-- coat -->
+    <path d="M38 80 Q60 73 82 80 L88 122 Q60 130 32 122 Z" fill="#fff" stroke="#D2DEF2" stroke-width="1.4"/>
+    <path d="M38 80 Q27 86 30 105 L41 105 Q40 90 47 86 Z" fill="#fff" stroke="#D2DEF2" stroke-width="1.2"/>
+    <path d="M82 80 Q95 84 96 68 L87 64 Q84 78 73 84 Z" fill="#fff" stroke="#D2DEF2" stroke-width="1.2"/>
+    <!-- neckerchief (blue) -->
+    <path d="M51 79 L60 93 L69 79 Z" fill="#2E90FF"/>
+    <circle cx="60" cy="80" r="3.4" fill="#1C6FD6"/>
+    <!-- buttons -->
+    <circle cx="54" cy="99" r="1.9" fill="#A9BCDB"/><circle cx="54" cy="111" r="1.9" fill="#A9BCDB"/>
+    <circle cx="66" cy="99" r="1.9" fill="#A9BCDB"/><circle cx="66" cy="111" r="1.9" fill="#A9BCDB"/>
+    <!-- head -->
+    <circle cx="60" cy="54" r="21" fill="#F4C9A3"/>
+    <circle cx="39.5" cy="56" r="3.5" fill="#F4C9A3"/><circle cx="80.5" cy="56" r="3.5" fill="#F4C9A3"/>
+    <!-- toque -->
+    <circle cx="46" cy="27" r="12" fill="url(#hat)"/><circle cx="60" cy="18" r="14.5" fill="url(#hat)"/><circle cx="74" cy="27" r="12" fill="url(#hat)"/>
+    <rect x="44" y="32" width="32" height="12" rx="3.5" fill="url(#hat)"/>
+    <rect x="44" y="40" width="32" height="5" rx="2" fill="#DCE6F6"/>
+    <!-- eyes -->
+    <circle cx="52" cy="54" r="4.6" fill="#fff"/><circle cx="68" cy="54" r="4.6" fill="#fff"/>
+    <circle cx="52.7" cy="55" r="2.5" fill="#2A2740"/><circle cx="68.7" cy="55" r="2.5" fill="#2A2740"/>
+    <circle cx="53.6" cy="53.8" r="0.9" fill="#fff"/><circle cx="69.6" cy="53.8" r="0.9" fill="#fff"/>
+    <!-- cheeks -->
+    <circle cx="45" cy="62" r="3.1" fill="#FF8A8A" opacity="0.45"/><circle cx="75" cy="62" r="3.1" fill="#FF8A8A" opacity="0.45"/>
+    <!-- mustache + smile -->
+    <path d="M50 63 Q55 68 60 64 Q65 68 70 63 Q66 67 60 67 Q54 67 50 63 Z" fill="#6B4A2E"/>
+    <path d="M55 69 Q60 73 65 69" stroke="#6B4A2E" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <!-- raised hand + spoon + steam -->
+    <g transform="rotate(20 92 60)">
+      <rect x="90.5" y="58" width="3" height="16" rx="1.5" fill="#C58A52"/>
+      <ellipse cx="92" cy="55" rx="5" ry="6.5" fill="#E0AE79"/>
+    </g>
+    <circle cx="88" cy="67" r="4.4" fill="#F4C9A3"/>
+    <path d="M95 47 q-3 -3 0 -6 q3 -3 0 -6" stroke="#9FC9FF" stroke-width="1.6" fill="none" opacity="0.6" stroke-linecap="round"/>
+  </svg>`;
+}
+document.getElementById('heromascot').innerHTML=mascotSVG(190);
+document.getElementById('ctamascot').innerHTML=mascotSVG(22);
+document.getElementById('kfab').innerHTML=mascotSVG(46);
+document.getElementById('emblem').innerHTML=emblemSVG();
+
+async function tmdb(path, params={}){
+  const url=new URL("/api/tmdb", location.origin);
+  url.searchParams.set("path", path);
+  Object.entries(params).forEach(([k,v])=> v!=null && url.searchParams.set(k,v));
+  const res=await fetch(url);
+  if(!res.ok) throw new Error("TMDB "+res.status);
+  return res.json();
+}
+
+const COUNTRIES=[
+  {id:"trending",label:"Trending",wink:"What everyone's binging right now 🍿"},
+  {id:"KR",label:"K-Drama",wink:"Grab the ramyeon — wanna stay over? 🍜"},
+  {id:"CN",label:"C-Drama",wink:"Palaces, wuxia & a thousand episodes of yearning 🏯"},
+  {id:"JP",label:"J-Drama",wink:"Short, tender, quietly devastating 🌸"},
+  {id:"TH",label:"Thai",wink:"Sunshine, charm & a little chaos ☀️"},
+  {id:"TR",label:"Turkish",wink:"Epic love that runs 150 episodes deep 🌙"},
+  {id:"toprated",label:"Top Rated",wink:"The cream of the crop — masterpieces only ⭐"},
+];
+let TV_GENRES=[]; let curCountry="trending"; let curGenre=null; let mode="browse";
+let curPage=1, totalPages=1, seenIds=new Set();
+
+const navtabs=document.getElementById('navtabs');
+COUNTRIES.forEach(c=>{
+  const b=document.createElement('button'); b.className='tab'; b.textContent=c.label;
+  b.onclick=()=>{ curCountry=c.id; curGenre=null; mode="browse"; document.getElementById('searchInput').value=""; renderGenres(); loadBrowse(true); window.scrollTo({top:document.getElementById('browse').offsetTop-70,behavior:'smooth'}); };
+  navtabs.appendChild(b);
+});
+function setActiveTab(){ [...navtabs.children].forEach((b,i)=> b.classList.toggle('active', COUNTRIES[i].id===curCountry && mode==='browse')); }
+
+async function loadGenres(){ try{ const d=await tmdb("/genre/tv/list",{language:"en"}); TV_GENRES=d.genres||[]; renderGenres(); }catch(e){console.error(e);} }
+const KEEP=["Drama","Comedy","Action & Adventure","Sci-Fi & Fantasy","Mystery","Crime","Animation","Family","War & Politics","Kids"];
+function renderGenres(){
+  const wrap=document.getElementById('genres'); wrap.innerHTML="";
+  const all=document.createElement('button'); all.className='gpill'+(curGenre===null?' active':''); all.textContent="All Genres";
+  all.onclick=()=>{curGenre=null;renderGenres();loadBrowse(true);}; wrap.appendChild(all);
+  TV_GENRES.filter(g=>KEEP.includes(g.name)).forEach(g=>{
+    const b=document.createElement('button'); b.className='gpill'+(curGenre===g.id?' active':''); b.textContent=g.name;
+    b.onclick=()=>{curGenre=g.id;renderGenres();loadBrowse(true);}; wrap.appendChild(b);
+  });
+}
+
+function discoverParams(page){
+  const p={language:"en",page,"vote_count.gte":40,sort_by:"popularity.desc",include_adult:false};
+  if(curGenre)p.with_genres=curGenre;
+  if(curCountry==="trending") p.with_origin_country=DRAMA_ORIGIN;
+  else if(curCountry==="toprated"){ p.with_origin_country=DRAMA_ORIGIN; p["vote_count.gte"]=200; p.sort_by="vote_average.desc"; }
+  else p.with_origin_country=curCountry;
+  return p;
+}
+function clean(s){
+  const nm=(s.name||"").trim().toLowerCase(), onm=(s.original_name||"").trim().toLowerCase();
+  if(BLOCKLIST.includes(nm)||BLOCKLIST.includes(onm)) return false;
+  return s.poster_path && !s.adult && !EXPLICIT.test(s.name||"") && !EXPLICIT.test(s.original_name||"");
+}
+
+function skeletons(n){ const g=document.getElementById('grid'); g.innerHTML=""; for(let i=0;i<n;i++){const d=document.createElement('div');d.innerHTML='<div class="sk"></div>';g.appendChild(d);} }
+function addCards(items){
+  const g=document.getElementById('grid');
+  items.forEach((s,i)=>{
+    const card=document.createElement('div'); card.className='card'; card.style.animationDelay=((i%18)*0.025)+"s";
+    const yr=(s.first_air_date||"").slice(0,4);
+    card.innerHTML=`<div class="poster">${s.vote_average?`<span class="rating">⭐ ${s.vote_average.toFixed(1)}</span>`:''}${s.poster_path?`<img loading="lazy" src="${IMG+s.poster_path}">`:`<div class="noimg">${s.name}</div>`}</div><div class="title">${s.name||s.original_name||"Untitled"}</div><div class="meta">${yr||""}</div>`;
+    card.onclick=()=>openDetail(s.id); g.appendChild(card);
+  });
+}
+
+async function loadBrowse(reset=true){
+  setActiveTab();
+  const c=COUNTRIES.find(x=>x.id===curCountry);
+  document.getElementById('secTitle').textContent = curGenre ? (TV_GENRES.find(g=>g.id===curGenre)?.name||"")+" · "+c.label : (c.id==="trending"?"Trending Now":c.label);
+  document.getElementById('wink').textContent = curGenre ? "" : c.wink;
+  if(reset){ curPage=1; seenIds=new Set(); document.getElementById('secCount').textContent=""; document.getElementById('loadmoreWrap').innerHTML=""; skeletons(18); }
+  try{
+    const data=await tmdb("/discover/tv", discoverParams(curPage));
+    totalPages=data.total_pages||1;
+    let items=(data.results||[]).filter(clean).filter(s=>!seenIds.has(s.id));
+    items.forEach(s=>seenIds.add(s.id));
+    if(reset) document.getElementById('grid').innerHTML="";
+    addCards(items);
+    if(!seenIds.size && reset) document.getElementById('grid').innerHTML='<div class="empty">🔭 No titles found. Try another filter or ask Kdrammer!</div>';
+    document.getElementById('secCount').textContent = seenIds.size+" titles";
+    if(reset){ setHeroBackdrops(items); if(curCountry==="trending") buildCollage(items); }
+    updateLoadMore();
+  }catch(e){ if(reset) document.getElementById('grid').innerHTML='<div class="empty">Couldn\'t load right now — check your connection &amp; refresh. ('+e.message+')</div>'; }
+}
+function updateLoadMore(){
+  const w=document.getElementById('loadmoreWrap');
+  w.innerHTML = (curPage<totalPages && curPage<25) ? '<button class="loadmore" onclick="loadMore()">Load more dramas ↓</button>' : '';
+}
+async function loadMore(){ document.getElementById('loadmoreWrap').innerHTML='<span style="color:var(--faint);font-size:13px">Loading…</span>'; curPage++; await loadBrowse(false); }
+
+function buildCollage(items){
+  const c=document.getElementById('bgCollage'); c.innerHTML="";
+  items.filter(s=>s.backdrop_path).slice(0,18).forEach(s=>{ const d=document.createElement('div'); d.style.backgroundImage=`url(${BDSMALL+s.backdrop_path})`; c.appendChild(d); });
+}
+let heroSet=[], heroIdx=0, heroTimer=null;
+function setHeroBackdrops(items){
+  heroSet=items.filter(s=>s.backdrop_path).slice(0,6).map(s=>BD+s.backdrop_path); heroIdx=0;
+  if(heroSet.length){ showHero(heroSet[0]); if(heroTimer)clearInterval(heroTimer); heroTimer=setInterval(rotateHero,6500); }
+}
+function showHero(url){ const el=document.getElementById('heroBg'); const img=new Image(); img.onload=()=>{ el.style.backgroundImage=`url(${url})`; el.classList.add('on'); }; img.src=url; }
+function rotateHero(){ if(heroSet.length<2)return; heroIdx=(heroIdx+1)%heroSet.length; const el=document.getElementById('heroBg'); el.classList.remove('on'); setTimeout(()=>showHero(heroSet[heroIdx]),700); }
+
+const SECRET=["saranghae","saranghaeyo","화이팅","hwaiting","사랑해"];
+async function runSearch(){
+  const q=document.getElementById('searchInput').value.trim(); if(!q) return;
+  if(SECRET.includes(q.toLowerCase())){ heartsBurst(); toast("💙 Saranghae~ Hwaiting! 화이팅 💙"); document.getElementById('searchInput').value=""; return; }
+  mode="search"; setActiveTab();
+  document.getElementById('secTitle').textContent='Results for "'+q+'"'; document.getElementById('wink').textContent=""; document.getElementById('secCount').textContent=""; document.getElementById('loadmoreWrap').innerHTML="";
+  skeletons(14); window.scrollTo({top:document.getElementById('browse').offsetTop-70,behavior:'smooth'});
+  try{
+    const data=await tmdb("/search/tv",{query:q,language:"en",page:1,include_adult:false});
+    const items=(data.results||[]).filter(clean);
+    document.getElementById('grid').innerHTML=""; addCards(items);
+    if(!items.length) document.getElementById('grid').innerHTML='<div class="empty">No results for that. Try another title!</div>';
+    document.getElementById('secCount').textContent=items.length+" found";
+  }catch(e){ document.getElementById('grid').innerHTML='<div class="empty">Search failed: '+e.message+'</div>'; }
+}
+function heartsBurst(){ for(let i=0;i<14;i++){ setTimeout(()=>{ const h=document.createElement('div'); h.className='heart'; h.textContent=['💙','💕','✨','💗','🩵'][i%5]; h.style.left=(10+Math.random()*80)+'vw'; document.body.appendChild(h); setTimeout(()=>h.remove(),2600);}, i*90);} }
+let toastT=null;
+function toast(msg){ let t=document.getElementById('toast'); if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t);} t.textContent=msg; t.classList.add('show'); if(toastT)clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
+
+async function openDetail(id){
+  const ov=document.createElement('div'); ov.className='overlay'; ov.onclick=e=>{if(e.target===ov)ov.remove();};
+  ov.innerHTML='<div class="modal"><div style="padding:80px;text-align:center;color:var(--faint)">Loading…</div></div>';
+  document.body.appendChild(ov);
+  try{
+    const s=await tmdb("/tv/"+id,{append_to_response:"credits",language:"en"});
+    const yr=(s.first_air_date||"").slice(0,4); const cast=(s.credits?.cast||[]).slice(0,8); const country=(s.origin_country||[]).join(", ");
+    ov.querySelector('.modal').innerHTML=`
+      <div class="modal-hero"><button class="modal-close" onclick="this.closest('.overlay').remove()">✕</button>${s.backdrop_path||s.poster_path?`<img src="${IMGBIG+(s.backdrop_path||s.poster_path)}">`:''}</div>
+      <div class="modal-body"><h2>${s.name}</h2>
+        <div class="modal-meta">${s.vote_average?`<span class="star">⭐ ${s.vote_average.toFixed(1)}</span>`:''}${yr?`<span>${yr}</span>`:''}${s.number_of_episodes?`<span>${s.number_of_episodes} episodes</span>`:''}${country?`<span>${country}</span>`:''}</div>
+        <div class="tagrow">${(s.genres||[]).map(g=>`<span class="gtag">${g.name}</span>`).join("")}</div>
+        <p class="syn">${s.overview||"No synopsis available yet."}</p>
+        ${cast.length?`<div class="cast-h">Cast</div><div class="cast">${cast.map(c=>`<div class="castm">${c.profile_path?`<img src="${PROFILE+c.profile_path}">`:`<div class="ph">🎭</div>`}<div class="cn">${c.name}</div><div class="cr">${c.character||""}</div></div>`).join("")}</div>`:''}
+      </div>`;
+  }catch(e){ ov.querySelector('.modal').innerHTML='<div style="padding:60px;text-align:center">Couldn\'t load details ('+e.message+')<br><br><button class="btn-ghost" onclick="this.closest(\'.overlay\').remove()">Close</button></div>'; }
+}
+
+const BUBBLES=["Saranghae 💙","Hwaiting! 화이팅","One more episode? 👀","Ottoke~ so many good ones!","Cooking up your binge 🍳","Aigoo, pick me one!"];
+let bi=0;
+function popBubble(){ const b=document.getElementById('bubble'); b.textContent=BUBBLES[bi%BUBBLES.length]; bi++; b.classList.add('show'); clearTimeout(b._t); b._t=setTimeout(()=>b.classList.remove('show'),2600); }
+setInterval(()=>{ if(!document.getElementById('kpanel')) popBubble(); }, 11000);
+
+let kStarted=false;
+function openK(){
+  document.getElementById('kfab').style.display='none';
+  if(document.getElementById('kpanel'))return;
+  const p=document.createElement('div'); p.className='kpanel'; p.id='kpanel';
+  p.innerHTML=`<div class="khead"><span class="kava">${mascotSVG(44)}</span><div><div class="kt">Kdrammer</div><div class="ks">cooking up your next binge 🍳</div></div><button class="kclose" onclick="closeK()">✕</button></div><div class="kbody" id="kbody"></div><div class="kfoot"><input id="kinput" placeholder="Describe your ideal drama..." onkeydown="if(event.key==='Enter')kSend()"><button onclick="kSend()">➤</button></div>`;
+  document.body.appendChild(p);
+  if(!kStarted){
+    kStarted=true;
+    botMsg(`Hey! 👋 I'm <b>Kdrammer</b>, your personal chef of dramas. Tell me what you're craving — a plot, a genre, a vibe, even a feeling — and I'll cook up the perfect picks. Try something tricky! ✨`);
+    const chips=document.createElement('div'); chips.className='kchips';
+    ["a chef who time travels","cdrama with a cold CEO romance","something for a rainy sunday","underrated historical revenge"].forEach(t=>{ const c=document.createElement('div'); c.className='kchip'; c.textContent=t; c.onclick=()=>{document.getElementById('kinput').value=t;kSend();}; chips.appendChild(c); });
+    document.getElementById('kbody').appendChild(chips);
+  }
+  setTimeout(()=>document.getElementById('kinput')?.focus(),100);
+}
+function closeK(){ document.getElementById('kpanel')?.remove(); document.getElementById('kfab').style.display='flex'; }
+function botMsg(html){ const b=document.getElementById('kbody'); const m=document.createElement('div'); m.className='kmsg bot'; m.innerHTML=html; b.appendChild(m); b.scrollTop=b.scrollHeight; return m; }
+function userMsg(t){ const b=document.getElementById('kbody'); const m=document.createElement('div'); m.className='kmsg user'; m.textContent=t; b.appendChild(m); b.scrollTop=b.scrollHeight; }
+
+async function kSend(){
+  const inp=document.getElementById('kinput'); const q=inp.value.trim(); if(!q)return;
+  inp.value=""; userMsg(q);
+  const b=document.getElementById('kbody');
+  const typing=document.createElement('div'); typing.className='ktyping'; typing.innerHTML='<span></span><span></span><span></span>'; b.appendChild(typing); b.scrollTop=b.scrollHeight;
+  let recs=null;
+  try{ recs=await callGemini(q); }catch(err){ recs=null; console.warn("Gemini fallback:",err.message); }
+  if(recs && recs.length){
+    const cards=[]; for(const r of recs.slice(0,5)){ const hit=await findOnTMDB(r.title,r.year); cards.push({rec:r,tmdb:hit}); }
+    typing.remove(); botMsg(`🎬 Here are my picks for you — ranked by how well they fit:`); renderSmart(cards); return;
+  }
+  try{
+    const {results}=await kdrammerSearch(q); typing.remove();
+    if(!results.length){ botMsg(`Hmm, I couldn't find a match right now. Try again in a moment, or add a country or genre to help me! 💡`); return; }
+    botMsg(`My smart brain is catching its breath 😅 — here are some close matches meanwhile:`);
+    const wrap=document.createElement('div'); wrap.className='kresults';
+    results.forEach(s=>{ const el=document.createElement('div'); el.className='kres'; el.innerHTML=`<div class="kp"><span class="kmatch">${s._match}%</span>${s.poster_path?`<img src="${IMG+s.poster_path}">`:''}</div><div class="ktitle">${s.name}</div>`; el.onclick=()=>openDetail(s.id); wrap.appendChild(el); });
+    b.appendChild(wrap); b.scrollTop=b.scrollHeight;
+  }catch(e){ typing.remove(); botMsg("Oops, something went wrong: "+e.message); }
+}
+async function callGemini(userText){
+  const res=await fetch("/api/gemini",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({text:userText}) });
+  if(!res.ok) throw new Error("Gemini "+res.status);
+  const d=await res.json();
+  return Array.isArray(d.recommendations)?d.recommendations:[];
+}
+async function findOnTMDB(title,year){
+  try{ const d=await tmdb("/search/tv",{query:title,language:"en"}); const list=(d.results||[]).filter(clean); if(!list.length)return null;
+    if(year){ const yr=list.find(s=>(s.first_air_date||"").startsWith(String(year))); if(yr)return yr; }
+    return list.find(s=>s.poster_path)||list[0];
+  }catch(e){ return null; }
+}
+function renderSmart(cards){
+  const b=document.getElementById('kbody'); const wrap=document.createElement('div'); wrap.className='ksmart';
+  cards.forEach(c=>{ const t=c.tmdb,r=c.rec; const el=document.createElement('div'); el.className='ksrow'+(t?' clk':''); const yr=r.year||(t?(t.first_air_date||'').slice(0,4):'');
+    el.innerHTML=`<div class="kspos">${t&&t.poster_path?`<img src="${IMG+t.poster_path}">`:`<div class="ksnop">🎭</div>`}</div><div class="kstxt"><div class="ksh"><span class="kstitle">${r.title}</span><span class="ksmatch">${r.match}%</span></div><div class="ksyear">${yr||''}${t&&t.vote_average?` · ⭐ ${t.vote_average.toFixed(1)}`:''}</div><div class="ksreason">${r.reason||''}</div></div>`;
+    if(t) el.onclick=()=>openDetail(t.id); wrap.appendChild(el); });
+  b.appendChild(wrap); b.scrollTop=b.scrollHeight;
+}
+
+const GENRE_WORDS={comedy:35,funny:35,romcom:35,action:10759,adventure:10759,martial:10759,fantasy:10765,magic:10765,"sci-fi":10765,scifi:10765,supernatural:10765,crime:80,gangster:80,mafia:80,mystery:9648,detective:9648,drama:18,melodrama:18,animation:16,animated:16,anime:16,family:10751,war:10768,political:10768,politics:10768};
+const COUNTRY_WORDS={korean:"KR",kdrama:"KR","k-drama":"KR",chinese:"CN",cdrama:"CN","c-drama":"CN",japanese:"JP",jdrama:"JP","j-drama":"JP",thai:"TH",thailand:"TH",turkish:"TR",turkey:"TR"};
+const STOP=new Set("i want a an the with about that show drama series watch looking for me some something to of and is in on lead leads where she he female male main very really kind type please can you find give recommend".split(" "));
+async function kdrammerSearch(query){
+  const q=query.toLowerCase(); let country=null;
+  for(const w in COUNTRY_WORDS){ if(q.includes(w)){country=COUNTRY_WORDS[w];break;} }
+  const genreIds=[]; for(const w in GENRE_WORDS){ if(q.includes(w)&&!genreIds.includes(GENRE_WORDS[w]))genreIds.push(GENRE_WORDS[w]); }
+  const words=[...new Set(q.replace(/[^a-z\s-]/g," ").split(/\s+/).filter(w=>w.length>2&&!STOP.has(w)&&!COUNTRY_WORDS[w]&&!GENRE_WORDS[w]))];
+  const kwIds=[]; for(const w of words.slice(0,4)){ try{ const kd=await tmdb("/search/keyword",{query:w}); if(kd.results&&kd.results.length)kwIds.push(kd.results[0].id);}catch(e){} }
+  const seen=new Set(); const out=[]; const base={language:"en",sort_by:"popularity.desc","vote_count.gte":30,page:1,include_adult:false,with_origin_country:DRAMA_ORIGIN};
+  if(country)base.with_origin_country=country;
+  async function pull(params,hi,lo){ try{ const d=await tmdb("/discover/tv",params); const list=(d.results||[]).filter(clean).filter(s=>!seen.has(s.id)); list.forEach((s,i)=>{ if(out.length>=9)return; seen.add(s.id); const span=hi-lo; s._match=Math.round(hi-span*(i/Math.max(1,list.length-1||1))); if(s._match<50)s._match=50; if(s._match>99)s._match=99; out.push(s); }); }catch(e){} }
+  if(genreIds.length||kwIds.length) await pull({...base,with_genres:genreIds.join(","),with_keywords:kwIds.join(",")},98,88);
+  if(out.length<9&&genreIds.length) await pull({...base,with_genres:genreIds.join(",")},85,72);
+  if(out.length<9&&kwIds.length) await pull({...base,with_keywords:kwIds.join(",")},80,66);
+  if(out.length<6) await pull({...base},68,55);
+  out.sort((a,b)=>b._match-a._match);
+  return {results:out.slice(0,9)};
+}
+
+function goHome(){ curCountry="trending"; curGenre=null; mode="browse"; document.getElementById('searchInput').value=""; renderGenres(); loadBrowse(true); window.scrollTo({top:0,behavior:'smooth'}); }
+(async function init(){ await loadGenres(); await loadBrowse(true); })();
+</script>
+</body>
+</html>
