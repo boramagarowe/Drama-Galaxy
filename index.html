@@ -14,7 +14,7 @@
     --line:rgba(234,242,255,.10); --gold:#FFC23D;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:smooth; overflow-x:hidden}
   body{background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; overflow-x:hidden; min-height:100vh; position:relative}
   ::-webkit-scrollbar{width:9px}
   ::-webkit-scrollbar-track{background:transparent}
@@ -171,7 +171,19 @@
   @keyframes rise-heart{0%{opacity:0;transform:translateY(0) scale(.5)}15%{opacity:1}100%{opacity:0;transform:translateY(-70vh) scale(1.3)}}
   .toast{position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px); z-index:301; background:#fff; color:#0E1424; font-weight:700; padding:12px 22px; border-radius:30px; box-shadow:0 10px 30px rgba(0,0,0,.4); opacity:0; transition:.4s}
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
-  @media (max-width:560px){ .hero{padding:36px 20px 24px} .hero-mascot{width:180px;height:180px} .section{padding:20px} }
+  @media (max-width:680px){
+    nav{flex-wrap:wrap; gap:10px 12px; padding:10px 14px}
+    .logo .logo-text{font-size:20px}
+    .searchwrap{margin-left:auto}
+    .searchwrap input{width:140px}
+    .searchwrap input:focus{width:150px}
+    .navtabs{order:3; width:100%; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:3px; scrollbar-width:none}
+    .navtabs::-webkit-scrollbar{display:none}
+    .hero{padding:32px 18px 22px}
+    .hero-text{min-width:0}
+    .hero-mascot{width:170px;height:170px}
+    .section{padding:20px 16px 36px}
+  }
 </style>
 </head>
 <body>
@@ -460,8 +472,8 @@ async function kSend(){
   inp.value=""; userMsg(q);
   const b=document.getElementById('kbody');
   const typing=document.createElement('div'); typing.className='ktyping'; typing.innerHTML='<span></span><span></span><span></span>'; b.appendChild(typing); b.scrollTop=b.scrollHeight;
-  let recs=null;
-  try{ recs=await callGemini(q); }catch(err){ recs=null; console.warn("Gemini fallback:",err.message); }
+  let recs=null, gErr=null;
+  try{ recs=await callGemini(q); }catch(err){ recs=null; gErr=err.message; console.warn("Gemini fallback:",err.message); }
   if(recs && recs.length){
     const cards=[]; for(const r of recs.slice(0,5)){ const hit=await findOnTMDB(r.title,r.year); cards.push({rec:r,tmdb:hit}); }
     typing.remove(); botMsg(`🎬 Here are my picks for you — ranked by how well they fit:`); renderSmart(cards); return;
@@ -469,7 +481,7 @@ async function kSend(){
   try{
     const {results}=await kdrammerSearch(q); typing.remove();
     if(!results.length){ botMsg(`Hmm, I couldn't find a match right now. Try again in a moment, or add a country or genre to help me! 💡`); return; }
-    botMsg(`My smart brain is catching its breath 😅 — here are some close matches meanwhile:`);
+    botMsg(`My smart brain is catching its breath 😅 — here are some close matches meanwhile:`+(gErr?` <span style="opacity:.45;font-size:10px">[debug: ${gErr}]</span>`:''));
     const wrap=document.createElement('div'); wrap.className='kresults';
     results.forEach(s=>{ const el=document.createElement('div'); el.className='kres'; el.innerHTML=`<div class="kp"><span class="kmatch">${s._match}%</span>${s.poster_path?`<img src="${IMG+s.poster_path}">`:''}</div><div class="ktitle">${s.name}</div>`; el.onclick=()=>openDetail(s.id); wrap.appendChild(el); });
     b.appendChild(wrap); b.scrollTop=b.scrollHeight;
@@ -477,8 +489,9 @@ async function kSend(){
 }
 async function callGemini(userText){
   const res=await fetch("/api/gemini",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({text:userText}) });
+  const d=await res.json().catch(()=>({}));
+  if(d && d.error) throw new Error(d.error + (d.detail?(": "+d.detail):""));
   if(!res.ok) throw new Error("Gemini "+res.status);
-  const d=await res.json();
   return Array.isArray(d.recommendations)?d.recommendations:[];
 }
 async function findOnTMDB(title,year){
