@@ -36,9 +36,9 @@
   .logo .logo-text{font-family:'Fraunces',serif; font-weight:700; font-size:23px; letter-spacing:.3px}
   .logo .gx{background:linear-gradient(120deg,var(--c1),var(--c2)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
   .navtabs{display:flex; gap:4px; flex-wrap:wrap}
-  .tab{padding:7px 15px; border-radius:30px; font-size:13.5px; font-weight:500; color:var(--muted); cursor:pointer; border:1px solid transparent; transition:.2s; white-space:nowrap}
-  .tab:hover{color:var(--text); background:rgba(234,242,255,.06)}
-  .tab.active{color:#fff; background:linear-gradient(120deg,var(--c1),var(--c2)); font-weight:700}
+  .tab{padding:7px 15px; border-radius:30px; font-size:13.5px; font-weight:500; color:var(--muted); cursor:pointer; border:1px solid var(--line); background:transparent; transition:.2s; white-space:nowrap}
+  .tab:hover{color:var(--text); background:rgba(234,242,255,.08); border-color:rgba(91,200,255,.45)}
+  .tab.active{color:#fff; background:linear-gradient(120deg,var(--c1),var(--c2)); border-color:transparent; font-weight:700; box-shadow:0 4px 16px rgba(46,144,255,.45)}
   .searchwrap{margin-left:auto; position:relative; display:flex; align-items:center}
   .searchwrap input{background:rgba(234,242,255,.07); border:1px solid var(--line); border-radius:30px; padding:9px 16px 9px 38px; font-size:13.5px; color:var(--text); outline:none; width:190px; font-family:inherit; transition:.2s}
   .searchwrap input:focus{border-color:var(--c1); width:230px}
@@ -472,8 +472,8 @@ async function kSend(){
   inp.value=""; userMsg(q);
   const b=document.getElementById('kbody');
   const typing=document.createElement('div'); typing.className='ktyping'; typing.innerHTML='<span></span><span></span><span></span>'; b.appendChild(typing); b.scrollTop=b.scrollHeight;
-  let recs=null, gErr=null;
-  try{ recs=await callGemini(q); }catch(err){ recs=null; gErr=err.message; console.warn("Gemini fallback:",err.message); }
+  let recs=null;
+  try{ recs=await callGemini(q); }catch(err){ recs=null; console.warn("Gemini fallback:",err.message); }
   if(recs && recs.length){
     const cards=[]; for(const r of recs.slice(0,5)){ const hit=await findOnTMDB(r.title,r.year); cards.push({rec:r,tmdb:hit}); }
     typing.remove(); botMsg(`🎬 Here are my picks for you — ranked by how well they fit:`); renderSmart(cards); return;
@@ -481,7 +481,7 @@ async function kSend(){
   try{
     const {results}=await kdrammerSearch(q); typing.remove();
     if(!results.length){ botMsg(`Hmm, I couldn't find a match right now. Try again in a moment, or add a country or genre to help me! 💡`); return; }
-    botMsg(`My smart brain is catching its breath 😅 — here are some close matches meanwhile:`+(gErr?` <span style="opacity:.45;font-size:10px">[debug: ${gErr}]</span>`:''));
+    botMsg(`My smart brain is catching its breath 😅 — here are some close matches meanwhile:`);
     const wrap=document.createElement('div'); wrap.className='kresults';
     results.forEach(s=>{ const el=document.createElement('div'); el.className='kres'; el.innerHTML=`<div class="kp"><span class="kmatch">${s._match}%</span>${s.poster_path?`<img src="${IMG+s.poster_path}">`:''}</div><div class="ktitle">${s.name}</div>`; el.onclick=()=>openDetail(s.id); wrap.appendChild(el); });
     b.appendChild(wrap); b.scrollTop=b.scrollHeight;
