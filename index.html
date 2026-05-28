@@ -171,6 +171,17 @@
   @keyframes rise-heart{0%{opacity:0;transform:translateY(0) scale(.5)}15%{opacity:1}100%{opacity:0;transform:translateY(-70vh) scale(1.3)}}
   .toast{position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px); z-index:301; background:#fff; color:#0E1424; font-weight:700; padding:12px 22px; border-radius:30px; box-shadow:0 10px 30px rgba(0,0,0,.4); opacity:0; transition:.4s}
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+  .weekly-card{position:relative; overflow:hidden; border-radius:22px; border:1px solid var(--line); background:var(--bg2); display:flex; gap:22px; padding:20px; align-items:center; cursor:pointer; transition:.25s}
+  .weekly-card:hover{border-color:rgba(91,200,255,.45); transform:translateY(-2px)}
+  .weekly-bd{position:absolute; inset:0; background-size:cover; background-position:center 28%; opacity:.18; z-index:0}
+  .weekly-card::after{content:''; position:absolute; inset:0; background:linear-gradient(100deg, var(--bg2) 34%, rgba(10,16,30,.45)); z-index:1; pointer-events:none}
+  .weekly-poster{position:relative; z-index:2; width:128px; min-width:128px; aspect-ratio:2/3; border-radius:14px; overflow:hidden; box-shadow:0 12px 32px rgba(0,0,0,.5)}
+  .weekly-poster img{width:100%; height:100%; object-fit:cover; display:block}
+  .weekly-info{position:relative; z-index:2; flex:1; min-width:0}
+  .weekly-badge{display:inline-block; font-size:11.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--c2); margin-bottom:8px}
+  .weekly-title{font-family:'Fraunces',serif; font-size:25px; font-weight:700; line-height:1.15; margin-bottom:6px}
+  .weekly-meta{font-size:13px; color:var(--muted); margin-bottom:10px}
+  .weekly-overview{font-size:13.7px; color:var(--muted); line-height:1.55; margin-bottom:14px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden}
   @media (max-width:680px){
     nav{flex-wrap:wrap; gap:10px 12px; padding:10px 14px}
     .logo .logo-text{font-size:20px}
@@ -189,6 +200,10 @@
     .hero-cta .btn-primary, .hero-cta .btn-ghost{flex:1; justify-content:center; white-space:nowrap; padding:13px 12px}
     .bubble{display:none}
     .section{padding:20px 16px 36px}
+    .weekly-card{gap:14px; padding:16px}
+    .weekly-poster{width:96px; min-width:96px}
+    .weekly-title{font-size:20px}
+    .weekly-overview{-webkit-line-clamp:4}
   }
 </style>
 </head>
@@ -223,6 +238,11 @@
     <div class="bubble" id="bubble"></div>
     <div class="floaty" id="heromascot" onmouseenter="popBubble()"></div>
   </div>
+</section>
+
+<section class="section" id="weekly" style="display:none">
+  <div class="sec-head"><h2>✨ This Week's Pick</h2></div>
+  <div class="weekly-card" id="weeklyCard"></div>
 </section>
 
 <section class="section" id="browse">
@@ -473,32 +493,45 @@ function closeK(){ document.getElementById('kpanel')?.remove(); document.getElem
 function botMsg(html){ const b=document.getElementById('kbody'); const m=document.createElement('div'); m.className='kmsg bot'; m.innerHTML=html; b.appendChild(m); b.scrollTop=b.scrollHeight; return m; }
 function userMsg(t){ const b=document.getElementById('kbody'); const m=document.createElement('div'); m.className='kmsg user'; m.textContent=t; b.appendChild(m); b.scrollTop=b.scrollHeight; }
 
+let kBusy=false;
 async function kSend(){
+  if(kBusy) return;
   const inp=document.getElementById('kinput'); const q=inp.value.trim(); if(!q)return;
+  kBusy=true;
   inp.value=""; userMsg(q);
   const b=document.getElementById('kbody');
   const typing=document.createElement('div'); typing.className='ktyping'; typing.innerHTML='<span></span><span></span><span></span>'; b.appendChild(typing); b.scrollTop=b.scrollHeight;
-  let recs=null;
-  try{ recs=await callGemini(q); }catch(err){ recs=null; console.warn("Gemini fallback:",err.message); }
+  let recs=null, errCode=null;
+  try{ recs=await callGemini(q); }catch(err){ recs=null; errCode=err.code||""; console.warn("Gemini fallback:",err.message); }
   if(recs && recs.length){
     const cards=[]; for(const r of recs.slice(0,5)){ const hit=await findOnTMDB(r.title,r.year); cards.push({rec:r,tmdb:hit}); }
-    typing.remove(); botMsg(`🎬 Here are my picks for you — ranked by how well they fit:`); renderSmart(cards); return;
+    typing.remove(); botMsg(`🎬 Here are my picks for you — ranked by how well they fit:`); renderSmart(cards); kBusy=false; return;
   }
   try{
     const {results}=await kdrammerSearch(q); typing.remove();
-    if(!results.length){ botMsg(`Hmm, I couldn't find a match right now. Try again in a moment, or add a country or genre to help me! 💡`); return; }
-    botMsg(`My smart brain is catching its breath 😅 — here are some close matches meanwhile:`);
+    if(!results.length){ botMsg(`Hmm, I couldn't find a match right now. Try again in a moment, or add a country or genre to help me! 💡`); kBusy=false; return; }
+    const msg = errCode==="rate_limited"
+      ? `Kdrammer's getting a lot of requests right now 🍳 — give me about 20–30 seconds, then ask again for smarter picks. In the meantime, here are some close matches:`
+      : `My smart brain is catching its breath 😅 — here are some close matches meanwhile:`;
+    botMsg(msg);
     const wrap=document.createElement('div'); wrap.className='kresults';
     results.forEach(s=>{ const el=document.createElement('div'); el.className='kres'; el.innerHTML=`<div class="kp"><span class="kmatch">${s._match}%</span>${s.poster_path?`<img src="${IMG+s.poster_path}">`:''}</div><div class="ktitle">${s.name}</div>`; el.onclick=()=>openDetail(s.id); wrap.appendChild(el); });
     b.appendChild(wrap); b.scrollTop=b.scrollHeight;
   }catch(e){ typing.remove(); botMsg("Oops, something went wrong: "+e.message); }
+  kBusy=false;
 }
+let _kCache={};
+try{ _kCache=JSON.parse(localStorage.getItem('dg_kdrammer_cache')||'{}'); }catch(e){}
 async function callGemini(userText){
+  const key=userText.trim().toLowerCase().replace(/\s+/g,' ');
+  if(_kCache[key] && _kCache[key].length) return _kCache[key];
   const res=await fetch("/api/gemini",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({text:userText}) });
   const d=await res.json().catch(()=>({}));
-  if(d && d.error) throw new Error(d.error + (d.detail?(": "+d.detail):""));
-  if(!res.ok) throw new Error("Gemini "+res.status);
-  return Array.isArray(d.recommendations)?d.recommendations:[];
+  if(d && d.error){ const e=new Error(d.error); e.code=d.error; throw e; }
+  if(!res.ok){ const e=new Error("http_"+res.status); e.code="http"; throw e; }
+  const recs=Array.isArray(d.recommendations)?d.recommendations:[];
+  if(recs.length){ try{ _kCache[key]=recs; const ks=Object.keys(_kCache); if(ks.length>60) delete _kCache[ks[0]]; localStorage.setItem('dg_kdrammer_cache',JSON.stringify(_kCache)); }catch(e){} }
+  return recs;
 }
 async function findOnTMDB(title,year){
   try{ const d=await tmdb("/search/tv",{query:title,language:"en"}); const list=(d.results||[]).filter(clean); if(!list.length)return null;
@@ -535,7 +568,40 @@ async function kdrammerSearch(query){
 }
 
 function goHome(){ curCountry="trending"; curGenre=null; mode="browse"; document.getElementById('searchInput').value=""; renderGenres(); loadBrowse(true); window.scrollTo({top:0,behavior:'smooth'}); }
-(async function init(){ await loadGenres(); await loadBrowse(true); })();
+
+async function loadWeeklyPick(){
+  try{
+    // Same pick for everyone, rotates automatically each week (week number since epoch).
+    const week=Math.floor(Date.now()/(7*24*60*60*1000));
+    const pool=[];
+    for(const pg of [1,2]){
+      const d=await tmdb("/discover/tv",{language:"en",page:pg,"vote_count.gte":300,sort_by:"vote_average.desc",include_adult:false,with_origin_country:DRAMA_ORIGIN});
+      (d.results||[]).filter(clean).forEach(s=>{ if(!pool.some(p=>p.id===s.id)) pool.push(s); });
+    }
+    if(!pool.length) return;
+    const pick=pool[week % pool.length];
+    const yr=(pick.first_air_date||"").slice(0,4);
+    const bd=pick.backdrop_path?BD+pick.backdrop_path:(pick.poster_path?IMGBIG+pick.poster_path:"");
+    const ov=(pick.overview||"A standout drama worth your week.").replace(/</g,"&lt;");
+    const card=document.getElementById('weeklyCard');
+    card.innerHTML=`
+      ${bd?`<div class="weekly-bd" style="background-image:url('${bd}')"></div>`:''}
+      <div class="weekly-poster">${pick.poster_path?`<img src="${IMG+pick.poster_path}">`:`<div class="noimg">${pick.name}</div>`}</div>
+      <div class="weekly-info">
+        <span class="weekly-badge">Featured this week</span>
+        <div class="weekly-title">${pick.name||pick.original_name||"Untitled"}</div>
+        <div class="weekly-meta">${yr||""}${pick.vote_average?` &middot; &#11088; ${pick.vote_average.toFixed(1)}`:""}</div>
+        <div class="weekly-overview">${ov}</div>
+        <button class="btn-primary">View details &rarr;</button>
+      </div>`;
+    card.onclick=()=>openDetail(pick.id);
+    document.getElementById('weekly').style.display="";
+  }catch(e){ console.warn("weekly pick:",e); }
+}
+
+(async function init(){ await loadGenres(); await loadBrowse(true); loadWeeklyPick(); })();
 </script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
