@@ -1,10 +1,10 @@
-// Secure Kdrammer brain. Tries several Gemini models until one works.
-// GET  /api/gemini           -> health check (is the key set?)
-// GET  /api/gemini?models=1  -> lists the models your key can actually use
+// Secure Kdrammer brain. Uses the highest-free-limit Gemini models, thinking off for speed.
+// GET  /api/gemini           -> health check
 // POST /api/gemini { text }  -> returns { recommendations: [...] }
 const SYS = "You are Kdrammer, an expert guide for TV dramas worldwide - K-dramas, C-dramas, J-dramas, Thai, Turkish, and beyond. The user describes what they feel like watching. Recommend the 4-5 REAL dramas that best match. Favor genuine fit over fame - include lesser-known gems. Do NOT recommend pornographic or explicitly erotic titles. Return ONLY a valid JSON array. Each element: {\"title\": exact English title (TMDB-style), \"year\": release year number, \"match\": integer 50-100 fit score, \"reason\": one short specific sentence}. Order highest match first. Interpret moods thoughtfully (e.g. 'rainy sunday' -> cozy, healing, slow-burn).";
 
-const MODELS = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.0-flash", "gemini-2.5-flash-lite", "gemini-1.5-flash"];
+// Full Flash first (smartest). If it's rate-limited, auto-drop to Flash-Lite (higher free limits).
+const MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-flash-lite-latest"];
 const BASE = "https://generativelanguage.googleapis.com/v1beta";
 
 function readJson(req) {
@@ -25,7 +25,11 @@ async function callModel(model, text) {
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: SYS }] },
       contents: [{ role: "user", parts: [{ text }] }],
-      generationConfig: { temperature: 0.8, responseMimeType: "application/json" }
+      generationConfig: {
+        temperature: 0.8,
+        responseMimeType: "application/json",
+        thinkingConfig: { thinkingBudget: 0 }
+      }
     })
   });
   const raw = await r.text();
@@ -57,8 +61,9 @@ module.exports = async (req, res) => {
         res.status(200).json({ recommendations: Array.isArray(arr) ? arr : [], model });
         return;
       }
-      lastErr = status + ": " + raw.slice(0, 150);
-      if (status !== 404) break; // a non-404 (bad key / region / quota) won't be fixed by another model
+      lastErr = status + ": " + raw.slice(0, 120);
+      // 404 (wrong name) or 429 (rate-limited) -> try the next model. Other errors -> stop.
+      if (status !== 404 && status !== 429) break;
     }
     res.status(200).json({ recommendations: [], error: "all_models_failed", detail: lastErr });
   } catch (e) {
