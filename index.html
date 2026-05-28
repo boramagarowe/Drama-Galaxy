@@ -179,9 +179,15 @@
     .searchwrap input:focus{width:150px}
     .navtabs{order:3; width:100%; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:3px; scrollbar-width:none}
     .navtabs::-webkit-scrollbar{display:none}
-    .hero{padding:32px 18px 22px}
-    .hero-text{min-width:0}
-    .hero-mascot{width:170px;height:170px}
+    .hero{flex-direction:column; align-items:center; text-align:center; gap:14px; padding:26px 18px 22px}
+    .hero-mascot{order:1; width:150px; height:150px}
+    .hero-text{order:2; min-width:0; max-width:100%}
+    .eyebrow{justify-content:center}
+    h1.headline{font-size:38px}
+    .hero-sub{margin:0 auto 20px; font-size:15.5px}
+    .hero-cta{justify-content:center; width:100%; gap:10px}
+    .hero-cta .btn-primary, .hero-cta .btn-ghost{flex:1; justify-content:center; white-space:nowrap; padding:13px 12px}
+    .bubble{display:none}
     .section{padding:20px 16px 36px}
   }
 </style>
