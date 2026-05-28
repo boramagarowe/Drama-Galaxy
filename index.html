@@ -575,7 +575,7 @@ async function loadWeeklyPick(){
     const week=Math.floor(Date.now()/(7*24*60*60*1000));
     const pool=[];
     for(const pg of [1,2]){
-      const d=await tmdb("/discover/tv",{language:"en",page:pg,"vote_count.gte":300,sort_by:"vote_average.desc",include_adult:false,with_origin_country:DRAMA_ORIGIN});
+      const d=await tmdb("/discover/tv",{language:"en",page:pg,"vote_count.gte":300,sort_by:"vote_average.desc",include_adult:false,with_origin_country:"KR|CN",without_genres:"16"});
       (d.results||[]).filter(clean).forEach(s=>{ if(!pool.some(p=>p.id===s.id)) pool.push(s); });
     }
     if(!pool.length) return;
