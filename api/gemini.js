@@ -34,15 +34,7 @@ async function callModel(model, text) {
 
 module.exports = async (req, res) => {
   if (req.method === "GET") {
-    if (req.query && req.query.models !== undefined) {
-      try {
-        const r = await fetch(BASE + "/models?key=" + process.env.GEMINI_KEY);
-        const d = await r.json();
-        res.status(200).json({ hasGeminiKey: !!process.env.GEMINI_KEY, models: (d.models || []).map((m) => m.name), error: d.error || null });
-      } catch (e) { res.status(200).json({ error: e.message }); }
-      return;
-    }
-    res.status(200).json({ status: "Kdrammer backend is alive", hasGeminiKey: !!process.env.GEMINI_KEY });
+    res.status(200).json({ status: "Kdrammer backend is alive" });
     return;
   }
   if (req.method !== "POST") { res.status(405).json({ error: "POST only" }); return; }
